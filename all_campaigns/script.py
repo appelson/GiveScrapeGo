@@ -1,79 +1,82 @@
-# ----------------------- IMPORTING LIBRARIES ---------------------------------
+# Importing libraries
 import time
 import json
 import os
+import random
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 import glob
 import pandas as pd
 
-# ----------------------- DOWNLOADING DATA ------------------------------------
+# Results folder
 output_folder = "results"
 os.makedirs(output_folder, exist_ok=True)
 
+# Driver setup
 options = uc.ChromeOptions()
-driver = uc.Chrome(options=options, version_main=145)
+driver = uc.Chrome(options=options, version_main=147)
+
+base_url = "https://api-v2.givesendgo.com/api/v1/public-campaigns?page={page}"
 
 try:
-    # --- Step 1: Fetch page 1 to get total pageCount ---
-    print("Fetching page 1 to determine total pages...")
-    driver.get("https://www.givesendgo.com/api/v2/campaigns?page=1")
+    # Fetch page 1 to get total pages
+    driver.get(base_url.format(page=1))
     time.sleep(3)
-
     soup = BeautifulSoup(driver.page_source, "html.parser")
     data = json.loads(soup.find("pre").text.strip())
-
-    total_pages = data["_meta"]["pageCount"]
-    print(f"Total pages: {total_pages}")
+    total_pages = data["pagination"]["last_page"]
 
     # Save page 1
     with open(os.path.join(output_folder, "sitemap_page1.json"), "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    print(f"  → Saved page 1 ({len(data.get('items', []))} campaigns)")
+    print(f"Saved page 1 ({len(data.get('data', []))} campaigns)")
 
-    # --- Step 2: Scrape pages 2 through total_pages ---
+    # Scrape pages 2 through total_pages
     for page in range(2, total_pages + 1):
-        url = f"https://www.givesendgo.com/api/v2/campaigns?page={page}"
-        print(f"Fetching page {page}/{total_pages}...")
+        url = BASE_URL.format(page=page)
+        print(f"Grabbing page {page}/{total_pages}...")
         driver.get(url)
-        time.sleep(0.5)
+
+        # Random sleep between pages to avoid detection
+        sleep_time = random.uniform(1, 3)
+        print(f" Sleeping {sleep_time:.1f}s...")
+        time.sleep(sleep_time)
 
         soup = BeautifulSoup(driver.page_source, "html.parser")
         pre = soup.find("pre")
         if not pre:
-            print(f"No JSON on page {page}, stopping.")
             break
 
         try:
             data = json.loads(pre.text.strip())
         except json.JSONDecodeError as e:
-            print(f"Failed to parse JSON on page {page}: {e}")
             break
 
-        items = data.get("items", [])
+        # Save page
         filename = os.path.join(output_folder, f"sitemap_page{page}.json")
         with open(filename, "w", encoding="utf-8") as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
-        print(f"  → Saved {len(items)} campaigns")
+        print(f"  → Saved {len(data.get('data', []))} campaigns")
 
 finally:
     driver.quit()
 
-# ----------------------- COMBINING JSONS ------------------------------------
+# Combining JSONs
 pattern = os.path.join(output_folder, "sitemap_page*.json")
 files = sorted(glob.glob(pattern), key=lambda x: int(x.split("page")[1].split(".")[0]))
+
 combined_campaigns = []
 for file in files:
     with open(file, "r", encoding="utf-8") as f:
-        combined_campaigns.extend(json.load(f).get("items", []))
+        combined_campaigns.extend(json.load(f).get("data", []))
 
 combined_file = os.path.join(output_folder, "all_campaigns.json")
 with open(combined_file, "w", encoding="utf-8") as f:
-    json.dump({"items": combined_campaigns}, f, ensure_ascii=False, indent=2)
+    json.dump({"data": combined_campaigns}, f, ensure_ascii=False, indent=2)
 
-# ----------------------- SAVING AS CSV ------------------------------------
+# Saving as CSV
 with open(combined_file, "r", encoding="utf-8") as f:
-    df = pd.DataFrame(json.load(f).get("items", []))
+    df = pd.DataFrame(json.load(f).get("data", []))
 
 csv_file = os.path.join(output_folder, "all_campaigns.csv")
 df.to_csv(csv_file, index=False)
