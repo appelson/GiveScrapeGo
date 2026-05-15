@@ -6,7 +6,7 @@ This is a Python toolkit for collecting and analyzing publicly available data fr
 
 ## Updates
 
-- ***May 15th, 2026*** Updated the "all campaign" scraper with the new api: [https://api-v2.givesendgo.com/api/v1/public-campaigns?](https://api-v2.givesendgo.com/api/v1/public-campaigns?).
+- ***May 15th, 2026***: Updated the "all campaign" scraper with the new api: [https://api-v2.givesendgo.com/api/v1/public-campaigns?](https://api-v2.givesendgo.com/api/v1/public-campaigns?).
 
 ![example](photo.png)
 ---
