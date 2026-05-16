@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # ----------------------- IMPORTING LIBRARIES ---------------------------------
 # Importing libraries
 import re
