@@ -4,6 +4,23 @@ This is a Python toolkit for collecting and analyzing publicly available data fr
 
 ***Note***: Everything collected is publicly visible on GiveSendGo without an account. No private data is accessed.
 
+## Other API Endpoints
+
+### Recent Donations
+- `GET` https://api-v2.givesendgo.com/api/v1/static-data/recent-donations
+
+### Static Data
+- `GET` https://api-v2.givesendgo.com/api/v1/static-data/countries
+
+### Public Campaigns
+- `GET` https://api-v2.givesendgo.com/api/v1/public-campaigns/categories
+- `GET` https://api-v2.givesendgo.com/api/v1/public-campaigns/trending
+- `GET` https://api-v2.givesendgo.com/api/v1/public-campaigns/{campaign}/updates
+- `GET` https://api-v2.givesendgo.com/api/v1/public-campaigns/{campaign}/prayer-requests
+
+### Testimonials
+- `GET` https://api-v2.givesendgo.com/api/v1/testimonials
+
 ## Updates
 
 - ***May 15th, 2026***: Updated the "all campaign" scraper with the new api: [https://api-v2.givesendgo.com/api/v1/public-campaigns?](https://api-v2.givesendgo.com/api/v1/public-campaigns?).
